@@ -1,23 +1,28 @@
 import re
 from requests import session
 from bs4 import BeautifulSoup
-
 import pandas as pd
 import os
-
 
 #Update to eventually take in any given # of pages? 
 kris_url = "https://letterboxd.com/krisheller/watchlist"
 chelsea_url = "https://letterboxd.com/clombardo331/watchlist"
-m_url = "https://letterboxd.com/mitchell/watchlist/"
-k_url = 'https://letterboxd.com/kurstboy/watchlist/'
+m_url = "https://letterboxd.com/mitchell/watchlist"
+k_url = 'https://letterboxd.com/kurstboy/watchlist'
+t_watchlist = 'https://letterboxd.com/mistat/watchlist/'
 
 
-def get_watchlist(user_wl_url):
+def get_watchlist(user_wl_url, verbose=0):
     s = session()
     r = s.get(user_wl_url)
     
     soup = BeautifulSoup(r.text, "html.parser")
+
+    #First check to see if username is valid
+    error = soup.find('body',attrs={'class':'error message-dark'})
+    if error != None:
+        print("Error: invalid letterboxd username passed to get_watchlist()")
+        return False
 
     #Determine if there is more than one page of movies on the watchlist
     try:
@@ -54,7 +59,7 @@ def get_watchlist(user_wl_url):
 
     return df
 
-def get_movie_details(watchlist):
+def get_movie_details(watchlist, verbose=0):
 
     #Flesh out the detail present in the movie list 
     #Can either take from existing data frame if already available or
