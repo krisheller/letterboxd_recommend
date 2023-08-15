@@ -23,7 +23,7 @@ def select_movie(user_list = []):
 
     #Get the watchlists for each user specified
     for i, username in enumerate(user_list):
-        wl = get_watchlist('https://letterboxd.com/'+username+'/watchlist')
+        wl = get_watchlist(username)
 
         if isinstance(wl, pd.DataFrame):
             wl['i'] = i+1
