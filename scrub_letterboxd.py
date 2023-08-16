@@ -1,6 +1,7 @@
 import re
 from requests import session
 from bs4 import BeautifulSoup
+
 import pandas as pd
 import os
 import numpy as np
@@ -12,9 +13,10 @@ m_url = "https://letterboxd.com/mitchell/watchlist"
 k_url = 'https://letterboxd.com/kurstboy/watchlist'
 t_watchlist = 'https://letterboxd.com/mistat/watchlist/'
 
+#The session to query within letterboxd.com
+s = session()
 
 def get_watchlist(username, verbose=0):
-    s = session()
     wl_url = 'https://letterboxd.com/'+username+'/watchlist/'
     r = s.get(wl_url)
     
@@ -87,8 +89,6 @@ def get_movie_details(watchlist, verbose=0):
     details = pd.DataFrame(columns=['LinkStub', 'FilmID', 'Title', 'ReleaseDate', 
                                     'Director', 'Duration','Summary', 'IMDbLink'])
     details.set_index('FilmID', inplace=True)
-    
-    s = session()
 
     #Generate a union between movies.csv and the watchlist to pull from more efficiently
     shared_movies = movies.reset_index().merge(watchlist, how='inner').set_index('FilmID')
@@ -184,7 +184,6 @@ def get_movie_details(watchlist, verbose=0):
     return details.reset_index(drop=True)
 
 def get_ratings(username, verbose=0, add_to_database=True):
-    s = session()
     films_url = 'https://letterboxd.com/'+username+'/films/'
     r = s.get(films_url)
     
@@ -248,13 +247,12 @@ def get_ratings(username, verbose=0, add_to_database=True):
 
     return df
 
-def scrub_popular_members(max_pages=10, verbose=0):
+def scrub_popular_members(max_pages=10, start_page=1, verbose=0):
 
     url_base = 'https://letterboxd.com/members/popular/this/all-time/page/'
-    s = session()
     user_list = []
 
-    for i in range(1, max_pages+1):
+    for i in range(start_page, max_pages+1):
         url = url_base + str(i)
         r = s.get(url)
 
@@ -272,5 +270,3 @@ def scrub_popular_members(max_pages=10, verbose=0):
             
 
     return
-
-scrub_popular_members(1)
