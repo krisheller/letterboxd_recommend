@@ -8,8 +8,6 @@ import numpy as np
 import os
 
 s = session()
-departed_link = 'http://www.imdb.com/title/tt0407887/maindetails'
-ptp_link = 'https://www.imdb.com/title/tt0029408/'
 
 def get_imdb_details(link):
 
@@ -85,35 +83,36 @@ def get_imdb_details(link):
     country = None
     language_list = []
 
-    details = soup.find('section',attrs={'data-testid':'Details'})
-    detail_rows = details.findChildren('li')
+    try:
+        details = soup.find('section',attrs={'data-testid':'Details'})
+        detail_rows = details.findChildren('li')
 
-    for row in detail_rows:
-        if 'Countries of origin' in row.get_text():
-            country = row.findChildren('li')[0].get_text()
-        
-        if 'Language' in row.get_text():
-            for language in row.findChildren('li'):
-                language_list.extend([language.get_text()])
+        for row in detail_rows:
+            if 'Countries of origin' in row.get_text():
+                country = row.findChildren('li')[0].get_text()
+            
+            if 'Language' in row.get_text():
+                for language in row.findChildren('li'):
+                    language_list.extend([language.get_text()])
+    except:
+        pass
 
     #Box office & gross revenue
     box_office = soup.find('section',attrs={'data-testid':'BoxOffice'})
 
+    budget = None
+    rev = None
+
     try:
         bo_rows = box_office.findChildren('li')
-        for row in bo_rows:
+        for row in bo_rows:      
             if 'Budget' in row.get_text():
-                budget = int(row.findChildren('div')[0].get_text().split(' ')[0].strip("$").replace(',',''))
-            else:
-                budget=None
+                budget = int(row.findChildren('div')[0].get_text().split(' ')[0].strip("$").strip("€").replace(',',''))
         for row in bo_rows:
             if 'Gross worldwide' in row.get_text():
-                rev = int(row.findChildren('div')[0].get_text().split(' ')[0].strip("$").replace(',',''))   
-            else:
-                rev=None
+                rev = int(row.findChildren('div')[0].get_text().split(' ')[0].strip("$").strip("€").replace(',','')) 
     except:
-        budget=None
-        rev = None
+        pass
 
     #Plot keyword tags
     keyword_link = link.replace('maindetails','') + 'keywords/?ref_=tt_stry_kw'
